@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+      "types": ["@testing-library/jest-dom"],
+      "target": "ESNext",
+      "useDefineForClassFields": true,
+      "lib": ["DOM", "DOM.Iterable", "ESNext"],
+      "allowJs": false,
+      "skipLibCheck": true,
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "strict": true,
+      "forceConsistentCasingInFileNames": true,
+      "module": "ESNext",
+      "moduleResolution": "Node",
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "noEmit": true,
+      "jsx": "react-jsx",
+      "baseUrl": "./",
+      "paths": {
+        "@/*": ["src/*"],
+        "@styles/*": ["src/styles/*"],
+        "@features/*": ["src/features/*"],
+        "@core/*": ["src/core/*"],
+        "@pages/*": ["src/pages/*"],
+        "@contexts/*": ["src/contexts/*"],
+        "@services/*": ["src/services/*"],
+        "@utils/*": ["src/utils/*"]
+      }
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"]
+  }

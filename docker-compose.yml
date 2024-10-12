@@ -1,0 +1,40 @@
+services:
+  client:
+    build:
+      context: ./client
+
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+    networks:
+      - app-network
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=sqlite://database.sqlite
+      - CORS_ORIGIN=http://localhost:5173
+    volumes:
+      - ./server/src:/app/src
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: "nouchka/sqlite3"
+    container_name: sqlite-db
+    volumes:
+      - ./data:/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
