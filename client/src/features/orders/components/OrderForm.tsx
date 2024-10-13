@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, TextField, Button, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { OrderDTO } from '@/features/orders/types';
+import { OrderDTO, OrderStatus } from '@/features/orders/types';
 import dayjs, { Dayjs } from 'dayjs';
 
 interface OrderFormProps {
@@ -68,7 +68,7 @@ const OrderForm = ({ onSubmit }: OrderFormProps) => {
             lat: lat === '' ? 0 : Number(lat),
             lon: lon === '' ? 0 : Number(lon),
             observations: orderData.observations,
-            status: orderData.status as 'unassigned' | 'assigned' | 'delivered',
+            status: orderData.status as OrderStatus,
             date: orderData.date,
         };
         onSubmit(formOrder);

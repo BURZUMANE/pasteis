@@ -1,4 +1,8 @@
-export type OrderStatus = 'unassigned' | 'assigned' | 'delivered';
+export enum OrderStatus {
+  Unassigned = 'unassigned',
+  Assigned = 'assigned',
+  Delivered = 'delivered'
+};
 
 export interface OrderDTO {
   weight: number;

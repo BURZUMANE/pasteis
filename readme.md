@@ -40,12 +40,13 @@ Ensure you have the following installed:
 There are two pre-configured user accounts for testing purposes:
 
 - **Username:** Driver  
-  **Password:** Driver
+  **Password:** password
 
 - **Username:** BigBoss777  
-  **Password:** BigBoss777
+  **Password:** password
 
-You can use either of these accounts to log in and test the application's functionality.
+In order to see how the system works there's need to login to both users from different browsers or two incognito tabs.
+
 
 ## Stopping the Application
 

@@ -2,7 +2,8 @@ import { useSocketContext } from '@/common/context/Socket';
 import { Order } from '@/common/types/order';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { useMarkOrderAsDeliveredMutation } from '@/features/orders/hooks';
-import { useFetchRoute } from '@/features/vehicles/hooks';
+import { OrderStatus } from '@/features/orders/types';
+import { useFetchRoute, useFetchVehicles } from '@/features/vehicles/hooks';
 import {
     Box,
     Button,
@@ -18,8 +19,6 @@ import {
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 
-
-
 const DriverPage = () => {
     const { user } = useAuth();
     const [filters, setFilters] = useState<{
@@ -31,6 +30,7 @@ const DriverPage = () => {
     });
 
     const { data, refetch } = useFetchRoute(!!user?.userId, filters);
+    const { data: vehicle, isLoading, isError } = useFetchVehicles(true, { vehiclePlate: user?.vehiclePlate });
     const orders = data?.orders || [];
     const googleMapsUrl = data?.googleMapsUrl;
     const { mutate } = useMarkOrderAsDeliveredMutation(refetch);
@@ -60,6 +60,21 @@ const DriverPage = () => {
             socket.off('orderCompleted', handleOrderCompleted);
         };
     }, [socket, refetch]);
+
+    const calculateAvailableCapacity = () => {
+        if (!vehicle || !vehicle[0] || !data) return null;
+
+        const totalOrderWeight = orders.reduce((acc, order) => {
+            if (order.status !== 'delivered') {
+                return acc + order.weight;
+            }
+            return acc;
+        }, 0);
+
+        return vehicle[0].maxCapacity - totalOrderWeight;
+    };
+
+    const availableCapacity = calculateAvailableCapacity();
 
     const renderOrder = (order: Order) => (
         <Grid size={12} key={order.id.toString()}>
@@ -100,12 +115,19 @@ const DriverPage = () => {
             </Card>
         </Grid>
     );
-    
 
     return (
         <Box sx={{ mt: 4, p: 2 }}>
             <Typography variant="h4" gutterBottom>Driver Dashboard</Typography>
-            <Typography variant="body1" gutterBottom>Welcome, {user?.userNickname} here are your scheduled orders for today.</Typography>
+            <Typography variant="body1" gutterBottom>
+                Welcome, {user?.userNickname}, here are your scheduled orders for today.
+            </Typography>
+
+            {availableCapacity !== null && (
+                <Typography variant="body1" gutterBottom>
+                    Available capacity: {availableCapacity} kg
+                </Typography>
+            )}
 
             {googleMapsUrl && (
                 <Box sx={{ mb: 4 }}>

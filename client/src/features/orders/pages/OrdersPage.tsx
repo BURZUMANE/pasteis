@@ -6,7 +6,7 @@ import OrderFilters from '@/features/orders/components/OrderFilters';
 import { OrderList } from '@/features/orders/components/OrderList';
 import AssignOrderModal from '@/features/orders/components/AssignOrderModal';
 import { useAssignOrderMutation, useCreateOrderMutation, useFetchOrders, useUpdateOrderMutation } from '@/features/orders/hooks';
-import { OrderDTO, OrderResponseItem } from '@/features/orders/types';
+import { OrderDTO, OrderResponseItem, OrderStatus } from '@/features/orders/types';
 import useToast from '@/common/hooks/useToast';
 import { useSocketContext } from '@/common/context/Socket';
 import { useAuth } from '@/features/auth/context/AuthContext';
@@ -43,7 +43,7 @@ const OrdersPage = () => {
                 setOrders((prevOrders) =>
                     prevOrders.map((order) =>
                         order.orderUUID === data.orderUUID
-                            ? { ...order, status: 'delivered' }
+                            ? { ...order, status: OrderStatus.Delivered }
                             : order
                     )
                 );

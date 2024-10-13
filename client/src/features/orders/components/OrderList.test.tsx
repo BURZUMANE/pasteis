@@ -1,7 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { OrderList } from "./OrderList";
-import { OrderResponseItem } from "@/features/orders/types";
-import { TableCell } from "@mui/material";
+import { OrderResponseItem, OrderStatus } from "../../orders/types";
 
 // Mock data
 const mockOrders: OrderResponseItem[] = [
@@ -11,7 +10,7 @@ const mockOrders: OrderResponseItem[] = [
     weight: 500,
     date: new Date().toISOString(),
     observations: "Deliver by 5pm",
-    status: "unassigned",
+    status: OrderStatus.Unassigned,
     vehicleSchedule: null,
     lat: 40.7128,
     lon: -74.0060,
@@ -26,7 +25,7 @@ const mockOrders: OrderResponseItem[] = [
     weight: 300,
     date: new Date().toISOString(),
     observations: "",
-    status: "assigned",
+    status: OrderStatus.Assigned,
     vehicleSchedule: {
       id: 1, // VehicleSchedule ID
       date: new Date().toISOString(), // Example date
