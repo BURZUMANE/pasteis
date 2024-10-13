@@ -1,14 +1,15 @@
 import 'reflect-metadata';
 import { createExpressServer } from 'routing-controllers';
-import { OrderController } from './controllers/orderController';
-import { UserController } from './controllers/userController';
-import { VehicleController } from './controllers/vehicleController';
+import { OrderController } from './features/order/orderController';
+import { UserController } from './features/user/userController';
+import { VehicleController } from './features/vehicle/vehicleController';
 import swaggerUi from 'swagger-ui-express';
 import { getMetadataArgsStorage } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
+import { RouteController } from './features/route/routeController';
 
 const app = createExpressServer({
-  controllers: [OrderController, UserController, VehicleController],
+  controllers: [OrderController, UserController, VehicleController, RouteController],
   cors: {
     origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],

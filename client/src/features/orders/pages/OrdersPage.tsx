@@ -5,10 +5,10 @@ import { CreateOrderButton } from '@/features/orders/components/CreateOrderButto
 import OrderFilters from '@/features/orders/components/OrderFilters';
 import { OrderList } from '@/features/orders/components/OrderList';
 import AssignOrderModal from '@/features/orders/components/AssignOrderModal';
-import { useAssignOrderMutation, useCreateOrderMutation, useFetchOrders } from '@/features/orders/hooks';
+import { useAssignOrderMutation, useCreateOrderMutation, useFetchOrders, useUpdateOrderMutation } from '@/features/orders/hooks';
 import { OrderDTO, OrderResponseItem } from '@/features/orders/types';
-import useToast from '@/core/hooks/useToast';
-import { useSocketContext } from '@/core/context/Socket';
+import useToast from '@/common/hooks/useToast';
+import { useSocketContext } from '@/common/context/Socket';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
 const OrdersPage = () => {
@@ -27,6 +27,7 @@ const OrdersPage = () => {
     });
 
     const { data: fetchedOrders, isLoading, isError } = useFetchOrders(filters);
+    const { mutate: mutateOrder } = useUpdateOrderMutation();
     const [orders, setOrders] = useState<OrderResponseItem[]>([]);
     const { socket } = useSocketContext();
 
@@ -85,7 +86,7 @@ const OrdersPage = () => {
 
     const handleClearFilter = useCallback(
         (field: string) => {
-            setFilters((prevFilters) => ({ ...prevFilters, [field]: '' }));
+            setFilters((prevFilters) => field === 'date' ? { ...prevFilters, [field]: dayjs().format('YYYY-MM-DD') } : { ...prevFilters, [field]: '' });
         },
         []
     );
@@ -99,6 +100,12 @@ const OrdersPage = () => {
             }));
         },
         []
+    );
+    const handleUpdateObservations = useCallback(
+        (order: OrderResponseItem) => {
+            mutateOrder(order)
+        }, []
+
     );
 
     return (
@@ -117,6 +124,7 @@ const OrdersPage = () => {
                     orders={orders || []}
                     onAssignOrder={handleAssignOrder}
                     onSortChange={handleSortChange}
+                    onUpdateObservations={handleUpdateObservations}
                     sort={filters.sort}
                     order={filters.order}
                 />

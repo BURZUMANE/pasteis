@@ -4,7 +4,7 @@ import { OrderResponseItem, OrderDTO } from '@/features/orders/types';
 import { API_ROUTES } from '@/services/apiRoutes';
 import { extractErrorMessage } from '@/utils/errorUtils';
 import { AxiosError } from 'axios';
-import useToast from '@/core/hooks/useToast';
+import useToast from '@/common/hooks/useToast';
 
 export const useFetchOrders = (filters: { date?: string, destination?: string, sort?: string, order?: 'ASC' | 'DESC', status?: string }) => {
     return useQuery<OrderResponseItem[]>({
@@ -70,6 +70,24 @@ export const useMarkOrderAsDeliveredMutation = (refetch: () => void) => {
         },
         onError: () => {
             showToast('Failed to mark order as delivered', 'error');
+        },
+    });
+};
+
+
+export const useUpdateOrderMutation = () => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: (updatedOrder: OrderResponseItem) => ApiUtils.put(API_ROUTES.ORDERS, updatedOrder),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['orders'] });
+            showToast('Order updated successfully', 'success');
+        },
+        onError: (e: AxiosError) => {
+            const errorMessage = extractErrorMessage(e);
+            showToast(errorMessage, 'error');
         },
     });
 };

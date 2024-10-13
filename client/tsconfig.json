@@ -21,7 +21,7 @@
         "@/*": ["src/*"],
         "@styles/*": ["src/styles/*"],
         "@features/*": ["src/features/*"],
-        "@core/*": ["src/core/*"],
+        "@core/*": ["src/common/*"],
         "@pages/*": ["src/pages/*"],
         "@contexts/*": ["src/contexts/*"],
         "@services/*": ["src/services/*"],

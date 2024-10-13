@@ -80,3 +80,5 @@ coverage/
 # Windows system files
 Thumbs.db
 desktop.ini
+
+server/combined.log

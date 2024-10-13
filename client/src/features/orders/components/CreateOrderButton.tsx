@@ -2,7 +2,7 @@ import OrderForm from "@/features/orders/components/OrderForm";
 import { OrderDTO } from "@/features/orders/types";
 import Button from "@mui/material/Button";
 import { useState } from "react";
-import Modal from "@/core/components/Modal/Modal";
+import Modal from "@/common/components/Modal/Modal";
 
 interface CreateOrderButtonProps {
     onSubmit: (order: OrderDTO) => void;

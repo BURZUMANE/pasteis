@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import logger from '../utils/logger';
+import logger from '../common/logger';
 
 export const userSocketMap: Map<number, string> = new Map();
 

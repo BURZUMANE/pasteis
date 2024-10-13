@@ -1,5 +1,6 @@
 import { Grid2 as Grid, TextField, MenuItem, InputAdornment, IconButton } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
+import dayjs from 'dayjs';
 
 interface OrderFiltersProps {
     filters: {
@@ -43,7 +44,7 @@ const OrderFilters = ({ filters, onFilterChange, onClearFilter }: OrderFiltersPr
                     slotProps={{
                         inputLabel: { shrink: true },
                         input: {
-                            endAdornment: filters.date && (
+                            endAdornment: filters.date && filters.date !== dayjs().format('YYYY-MM-DD') && (
                                 <InputAdornment position="end">
                                     <IconButton onClick={() => onClearFilter('date')} edge="end">
                                         <ClearIcon />
@@ -66,6 +67,7 @@ const OrderFilters = ({ filters, onFilterChange, onClearFilter }: OrderFiltersPr
                     onChange={(e) => onFilterChange('status', e.target.value)}
                 >
                     <MenuItem value="">All</MenuItem>
+                    <MenuItem value="assigned">Assigned</MenuItem>
                     <MenuItem value="unassigned">Unassigned</MenuItem>
                     <MenuItem value="delivered">Delivered</MenuItem>
                 </TextField>

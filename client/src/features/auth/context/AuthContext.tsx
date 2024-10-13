@@ -1,4 +1,4 @@
-import { AuthContextType, User, UserRole } from '@/core/types';
+import { AuthContextType, User, UserRole } from '@/common/types';
 import { createContext, ReactNode, useContext, useState, useMemo } from 'react';
 
 const defaultUser: User = {

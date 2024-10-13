@@ -1,159 +1,140 @@
-import Modal from '@/core/components/Modal/Modal';
+import Modal from '@/common/components/Modal/Modal';
+import useToast from '@/common/hooks/useToast';
+import { CreateVehicle } from '@/common/types';
 import VehicleFilters from '@/features/vehicles/components/VehicleFilters';
-import { useFetchVehicles } from '@/features/vehicles/hooks';
-import { ApiUtils } from '@/services/api';
+import { useCreateVehicleMutation, useFetchVehicles, useToggleFavouriteVehicleMutation } from '@/features/vehicles/hooks';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, CircularProgress } from '@mui/material';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Box, Button, CircularProgress, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import VehicleForm from '../components/VehicleForm';
-import { useAuth } from '@/features/auth/context/AuthContext';
-import { CreateVehicle } from '@/core/types';
-import useToast from '@/core/hooks/useToast';
 
 const VehiclesPage = () => {
-    const { user } = useAuth();
-    const { showToast } = useToast();
-    const [open, setOpen] = useState(false);
-    const [filters, setFilters] = useState({
-        vehiclePlate: '',
-        date: dayjs().format('YYYY-MM-DD'),
-    });
+  const { showToast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    vehiclePlate: '',
+  });
 
-    const queryClient = useQueryClient();
-    const { data: vehicles, isLoading, isError } = useFetchVehicles(true, filters);
+  const { data: vehicles, isLoading, isError } = useFetchVehicles(true, filters);
 
-    const createVehicleMutation = useMutation({
-        mutationFn: (data: any) => ApiUtils.post('/vehicles', { ...data, userId: user?.userId }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['vehicles', filters] });
-            setOpen(false);
-            showToast('Vehicle created successfully', 'success');
-        },
-        onError: () => {
-            showToast('Failed to create vehicle', 'error');
-        },
-    });
+  const handleClose = () => setOpen(false);
 
-    const toggleFavouriteMutation = useMutation({
-        mutationFn: (vehicleId: number) => ApiUtils.post(`/vehicles/${vehicleId}/toggleFavourite`, { userId: user?.userId }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['vehicles', filters] });
-            showToast('Favorite toggled successfully', 'success');
-        },
-        onError: () => {
-            showToast('Failed to toggle favorite', 'error');
-        },
-    });
+  const { mutate: toggleFavouriteMutation } = useToggleFavouriteVehicleMutation({ onSuccess: () => { showToast('Favorite toggled successfully', 'success') }, onError: () => { showToast('Failed to toggle favorite', 'error') } });
 
-    const handleCreateVehicle = (data: CreateVehicle) => {
-        createVehicleMutation.mutate(data);
-    };
+  const handleCreateVehicle = (data: CreateVehicle) => {
+    createVehicle(data);
+    handleClose();
+  };
 
-    const handleToggleFavourite = (vehicleId: number) => {
-        toggleFavouriteMutation.mutate(vehicleId);
-    };
+  const { mutate: createVehicle } = useCreateVehicleMutation({
+    onSuccess: handleClose, onError: () => {
+      showToast('Failed to create vehicle', 'error');
+    }
+  })
 
-    const handleFilterChange = (field: string, value: string) => {
-        setFilters((prev) => ({ ...prev, [field]: value }));
-    };
+  const handleToggleFavourite = (vehicleId: number) => {
+    toggleFavouriteMutation(vehicleId);
+  };
 
-    const handleClearFilter = (field: string) => {
-        setFilters((prev) => ({ ...prev, [field]: '' }));
-    };
+  const handleFilterChange = (field: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
 
-    const handleClose = () => setOpen(false);
+  const handleClearFilter = (field: string) => {
+    setFilters((prev) => ({ ...prev, [field]: '' }));
+  };
 
-    return (
-        <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4 }}>
-                <Typography variant="h4">Vehicles</Typography>
-                <Button variant="contained" onClick={() => setOpen(true)} sx={{ mt: 2, mb: 2 }}>
-                    Add Vehicle
-                </Button>
-            </Box>
 
-            <VehicleFilters filters={filters} onFilterChange={handleFilterChange} onClearFilter={handleClearFilter} />
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4 }}>
+        <Typography variant="h4">Vehicles</Typography>
+        <Button variant="contained" onClick={() => setOpen(true)} sx={{ mt: 2, mb: 2 }}>
+          Add Vehicle
+        </Button>
+      </Box>
 
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Vehicle Plate</TableCell>
-                            <TableCell>Available Capacity</TableCell>
-                            <TableCell>Assigned Orders</TableCell>
-                            <TableCell>Favourite</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={4} align="center">
-                                    <CircularProgress />
-                                </TableCell>
-                            </TableRow>
-                        ) : isError ? (
-                            <TableRow>
-                                <TableCell colSpan={4} align="center">
-                                    <Typography color="error">Failed to load vehicles</Typography>
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            vehicles?.map((vehicle) => {
-                                const schedule = vehicle.schedules?.[0];
-                                return (
-                                    <TableRow key={vehicle.id} sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}>
-                                        <TableCell>{vehicle.vehiclePlate}</TableCell>
-                                        <TableCell>{vehicle.availableCapacity} kg</TableCell>
-                                        <TableCell>
-                                            {schedule ? (
-                                                <Box>
-                                                    {schedule.orders && schedule.orders.length > 0 ? (
-                                                        <ul>
-                                                            {schedule.orders.map((order) => (
-                                                                <li key={order.id}>
-                                                                    {order.destination} ({order.weight} kg) - {order.status}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    ) : (
-                                                        'No orders assigned'
-                                                    )}
-                                                </Box>
-                                            ) : (
-                                                'No schedules'
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <IconButton onClick={() => handleToggleFavourite(vehicle.id)}>
-                                                {vehicle.isFavorite ? <StarIcon /> : <StarBorderIcon />}
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+      <VehicleFilters filters={filters} onFilterChange={handleFilterChange} onClearFilter={handleClearFilter} />
 
-            <Modal open={open} onClose={handleClose}>
-                <Box
-                    sx={{
-                        backgroundColor: 'white',
-                        padding: 2,
-                        maxWidth: 500,
-                        mx: 'auto',
-                    }}
-                >
-                    <Typography variant="h6" sx={{ mb: 2 }}>Add New Vehicle</Typography>
-                    <VehicleForm onSubmit={(data) => { handleCreateVehicle(data); handleClose(); }} />
-                </Box>
-            </Modal>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Vehicle Plate</TableCell>
+              <TableCell>Available Capacity</TableCell>
+              <TableCell>Assigned Orders</TableCell>
+              <TableCell>Favourite</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            ) : isError ? (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  <Typography color="error">Failed to load vehicles</Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              vehicles?.map((vehicle) => {
+                const schedule = vehicle.schedules?.[0];
+                return (
+                  <TableRow key={vehicle.id} sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}>
+                    <TableCell>{vehicle.vehiclePlate}</TableCell>
+                    <TableCell>{vehicle.availableCapacity} kg</TableCell>
+                    <TableCell>
+                      {schedule ? (
+                        <Box>
+                          {schedule.orders && schedule.orders.length > 0 ? (
+                            <ul>
+                              {schedule.orders.map((order) => (
+                                <li key={order.id}>
+                                  {order.destination} ({order.weight} kg) - {order.status}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            'No orders assigned'
+                          )}
+                        </Box>
+                      ) : (
+                        'No schedules'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <IconButton onClick={() => handleToggleFavourite(vehicle.id)}>
+                        {vehicle.isFavorite ? <StarIcon /> : <StarBorderIcon />}
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Modal open={open} onClose={handleClose}>
+        <Box
+          sx={{
+            backgroundColor: 'white',
+            padding: 2,
+            maxWidth: 500,
+            mx: 'auto',
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2 }}>Add New Vehicle</Typography>
+          <VehicleForm onSubmit={handleCreateVehicle} />
         </Box>
-    );
+      </Modal>
+    </Box>
+  );
 };
 
 export default VehiclesPage;

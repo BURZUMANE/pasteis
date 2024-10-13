@@ -1,4 +1,4 @@
-import { config } from '@/config';
+import { config } from '@/config/config';
 import { io, Socket } from 'socket.io-client';
 
 let socket: Socket | null = null;

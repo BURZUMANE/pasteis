@@ -16,4 +16,5 @@ export interface OrderResponseItem extends OrderDTO {
   vehiclePlate: string | null;
   createdAt: string;
   updatedAt: string;
+  vehicleSchedule?: VehicleSchedule | null
 }

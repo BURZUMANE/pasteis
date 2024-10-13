@@ -1,16 +1,26 @@
+import { StyledTableCell, StyledTypography } from "./OrderList.styles";
 import { OrderResponseItem } from "@/features/orders/types";
-import { ArrowDownward, ArrowUpward, Event, Info, LocalShipping, LocationOn, Place, Scale } from "@mui/icons-material";
-import { Button, Link, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { ArrowDownward, ArrowUpward, Event, Edit, Check, Place, Scale } from "@mui/icons-material";
+import { Box, Button, Link, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from "@mui/material";
+import { useState } from "react";
 
 interface OrderListProps {
     orders: OrderResponseItem[];
     onAssignOrder: (orderUUID: string) => void;
     onSortChange: (column: string) => void;
+    onUpdateObservations: (order: OrderResponseItem) => void;
     sort: string;
     order: "ASC" | "DESC";
 }
 
-export const OrderList = ({ orders, onAssignOrder, onSortChange, sort, order }: OrderListProps) => {
+const generateGoogleMapsLink = (lat: number, lon: number) => {
+    return `https://www.google.com/maps?q=${lat},${lon}`;
+};
+
+export const OrderList = ({ orders, onAssignOrder, onSortChange, onUpdateObservations, sort, order }: OrderListProps) => {
+    const [editingOrder, setEditingOrder] = useState<OrderResponseItem | null>();
+    const [observations, setObservations] = useState<string>("");
+
     const getSortIcon = (column: string) => {
         if (sort === column) {
             return order === "ASC" ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />;
@@ -18,8 +28,14 @@ export const OrderList = ({ orders, onAssignOrder, onSortChange, sort, order }: 
         return null;
     };
 
-    const generateGoogleMapsLink = (lat: number, lon: number) => {
-        return `https://www.google.com/maps?q=${lat},${lon}`;
+    const handleEditClick = (order: OrderResponseItem) => {
+        setEditingOrder(order);
+    };
+
+    const handleSaveClick = () => {
+        onUpdateObservations({ ...editingOrder, observations: observations } as any);
+        setEditingOrder(null);
+        setObservations('');
     };
 
     return (
@@ -27,50 +43,52 @@ export const OrderList = ({ orders, onAssignOrder, onSortChange, sort, order }: 
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell onClick={() => onSortChange("destination")}>
-                            <Typography variant="button" display="block" gutterBottom>
-                                <LocationOn sx={{ verticalAlign: 'middle', mr: 1 }} />
-                                Destination {getSortIcon("destination")}
-                            </Typography>
-                        </TableCell>
-                        <TableCell onClick={() => onSortChange("weight")}>
-                            <Typography variant="button" display="block" gutterBottom>
-                                <Scale sx={{ verticalAlign: 'middle', mr: 1 }} />
+                        <StyledTableCell onClick={() => onSortChange("destination")}>
+                            <StyledTypography variant="button" display="block" gutterBottom>
+                                Dest Name {getSortIcon("destination")}
+                            </StyledTypography>
+                        </StyledTableCell>
+                        <StyledTableCell onClick={() => onSortChange("weight")}>
+                            <StyledTypography variant="button" display="block" gutterBottom>
                                 Weight (kg) {getSortIcon("weight")}
-                            </Typography>
-                        </TableCell>
-                        <TableCell onClick={() => onSortChange("date")}>
-                            <Typography variant="button" display="block" gutterBottom>
-                                <Event sx={{ verticalAlign: 'middle', mr: 1 }} />
+                            </StyledTypography>
+                        </StyledTableCell>
+                        <StyledTableCell onClick={() => onSortChange("date")}>
+                            <StyledTypography variant="button" display="block" gutterBottom>
                                 Date {getSortIcon("date")}
-                            </Typography>
-                        </TableCell>
+                            </StyledTypography>
+                        </StyledTableCell>
+                        <StyledTableCell onClick={() => onSortChange("observations")}>
+                            <StyledTypography variant="button" display="block" gutterBottom>
+                                Observations {getSortIcon("observations")}
+                            </StyledTypography>
+                        </StyledTableCell>
                         <TableCell>
-                            <Typography variant="button" display="block" gutterBottom>
-                                <Info sx={{ verticalAlign: 'middle', mr: 1 }} />
+                            <StyledTypography variant="button" display="block" gutterBottom>
                                 Status
-                            </Typography>
+                            </StyledTypography>
                         </TableCell>
                         <TableCell>
-                            <Typography variant="button" display="block" gutterBottom>
-                                <Info sx={{ verticalAlign: 'middle', mr: 1 }} />
+                            <StyledTypography variant="button" display="block" gutterBottom>
                                 Vehicle plate
-                            </Typography>
+                            </StyledTypography>
                         </TableCell>
                         <TableCell>
-                            <Typography variant="button" display="block" gutterBottom>
-                                <Place sx={{ verticalAlign: 'middle', mr: 1 }} />
-                                Coordinates
-                            </Typography>
+                            <StyledTypography variant="button" display="block" gutterBottom>
+                                Dest Coordinates
+                            </StyledTypography>
                         </TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell>
+                            <StyledTypography variant="button" display="block" gutterBottom>
+                                Actions
+                            </StyledTypography>
+                        </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {orders.map((order) => (
                         <TableRow key={order.id}>
                             <TableCell>
-                                <LocationOn sx={{ verticalAlign: 'middle', mr: 1 }} />
                                 {order.destination}
                             </TableCell>
                             <TableCell>
@@ -78,32 +96,65 @@ export const OrderList = ({ orders, onAssignOrder, onSortChange, sort, order }: 
                                 {order.weight}
                             </TableCell>
                             <TableCell>
-                                <Event sx={{ verticalAlign: 'middle', mr: 1 }} />
-                                {new Date(order.date).toLocaleDateString()}
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Event sx={{ verticalAlign: 'middle', mr: 1 }} />
+                                    {new Date(order.date).toLocaleDateString()}
+                                </Box>
                             </TableCell>
                             <TableCell>
-                                <Info sx={{ verticalAlign: 'middle', mr: 1 }} />
+                                {(editingOrder && editingOrder.id === order.id) ? (
+                                    <TextField
+                                        value={observations}
+                                        onChange={(e) => setObservations(e.target.value)}
+                                        size="small"
+                                    />
+                                ) : (
+                                    order.observations || '-'
+                                )}
+                            </TableCell>
+                            <TableCell>
                                 {order.status}
                             </TableCell>
                             <TableCell>
-                                <Info sx={{ verticalAlign: 'middle', mr: 1 }} />
-                                {order.vehiclePlate || 'N/A'}
+                                {order.vehicleSchedule?.vehicle?.vehiclePlate || 'N/A'}
                             </TableCell>
                             <TableCell>
                                 <Link href={generateGoogleMapsLink(order.lat, order.lon)} target="_blank" rel="noopener noreferrer">
-                                    <Place sx={{ verticalAlign: 'middle', mr: 1 }} />
-                                    {Number(order.lat).toFixed(3)}, {Number(order.lon).toFixed(3)}
+                                    <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                        <Place sx={{ verticalAlign: 'middle', mr: 1 }} />
+                                        {Number(order.lat).toFixed(3)}, {Number(order.lon).toFixed(3)}
+                                    </Box>
                                 </Link>
                             </TableCell>
                             <TableCell>
-                                {order.status === 'unassigned' && <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => onAssignOrder(order.orderUUID)}
-                                    startIcon={<LocalShipping />}
-                                >
-                                    Assign to Vehicle
-                                </Button>}
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', whiteSpace: 'nowrap' }}>
+                                    {order.status === 'unassigned' && (
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={() => onAssignOrder(order.orderUUID)}
+                                        >
+                                            Assign
+                                        </Button>
+                                    )}
+                                    {editingOrder && editingOrder.id === order.id ? (
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            onClick={() => handleSaveClick()}
+                                        >
+                                            <Check sx={{ verticalAlign: 'middle' }} />
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => handleEditClick(order)}
+                                        >
+                                            <Edit sx={{ verticalAlign: 'middle' }} />
+
+                                        </Button>
+                                    )}
+                                </Box>
                             </TableCell>
                         </TableRow>
                     ))}

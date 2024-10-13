@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { ApiUtils } from '@/services/api';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { Credentials, User } from '@/core/types';
+import { Credentials, User } from '@/common/types';
 
 
 

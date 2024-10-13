@@ -1,7 +1,6 @@
+import { CreateVehicle } from '@/common/types';
+import { Box, Button, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
-import { useCreateVehicleMutation } from '@/features/vehicles/hooks';
-import { CreateVehicle } from '@/core/types';
 
 interface VehicleFormProps {
     onSubmit: (data: CreateVehicle) => void;
@@ -13,8 +12,6 @@ const VehicleForm = ({ onSubmit }: VehicleFormProps) => {
         maxCapacity: '',
         availableCapacity: '',
     });
-
-    const createVehicleMutation = useCreateVehicleMutation();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

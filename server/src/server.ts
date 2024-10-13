@@ -1,10 +1,14 @@
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import app from './app';
-import { sequelize } from './models';
-import seedDatabase from './seedDatabase';
+import { sequelize } from './features/models';
+import seedDatabase from './database/seeds/seedDatabase';
 import configureSocket from './services/socketService';
-import logger from './utils/logger';
+import logger from './common/logger';
+
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.development' });
 
 const server = createServer(app);
 

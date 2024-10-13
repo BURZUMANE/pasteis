@@ -9,7 +9,7 @@ import {
     InputLabel,
 } from '@mui/material';
 import { useFetchVehicles } from '@/features/vehicles/hooks';
-import Modal from '@/core/components/Modal/Modal';
+import Modal from '@/common/components/Modal/Modal';
 
 interface AssignOrderModalProps {
     open: boolean;
